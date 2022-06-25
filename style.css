@@ -1,0 +1,160 @@
+body {
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    background: #272733;
+}
+
+.btn {
+    display: inline-block;
+    background: #A9927D;
+    color: #fff;
+    border: none;
+    padding: .75em 1.25em;
+    margin: .25em;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.15em;
+    font-family: inherit;
+    min-width: 8rem;
+}
+    .btn:hover {
+        background: #d39a65;
+        transform: scale(1.05, 1);
+    }
+    .btn:disabled {
+        background: #806e5d;
+    }
+    .btn:disabled:hover {
+        transform: none;
+    }
+
+.menu-btn {
+    width: 100%;
+}
+    .menu-btn:hover {
+        transform: none;
+    }
+
+.choice-btn {
+    display: block;
+    width: 50%;
+}
+
+.hidden {
+   display: none;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.flex-column {
+    flex-direction: column !important;
+}
+
+/*------SIDEBAR------*/
+.sidebar {
+    display: flex;
+    position: absolute;
+
+    width: 18em;
+    height: 100%;
+    background: #380e15;
+    color: #f2f4f3;
+    transition: 0.5s;
+    overflow: hidden;
+}
+
+.sidebar ul li {
+    padding: 1em 1.5em 0 1.5em;
+}
+
+@media (max-width: 600px) {
+    .sidebar {
+        width: 100%;
+    }
+
+    .board {
+        padding-left: 0;
+    }
+}
+/*------MODALS------*/
+.modal {
+    z-index: 1; /* Sit on top */
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    left: 0;
+    top: 0;
+    position:fixed;
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+.optionsModal {
+    display: none; /* Hidden by default */
+  }
+
+.saveModal {
+    display: none; /* Hidden by default */
+}
+  
+.modal-content {
+    background-color: #551621;
+    color: #f2f4f3;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #411018;
+    width: 60%;
+}
+
+.save-content {
+    text-align: center;
+    width: 30%;
+}
+
+  /* Close Buttons */
+.close {
+    color: #d39a65;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+    .close:hover,
+    .close:focus {
+        color: #f2f4f3;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+
+/*------BOARD------*/
+.board {
+    display: block;
+    padding-top: 0;
+    margin: 0;
+    padding-left: 20em;
+    padding-right: 2em;
+    color: #b8b293;
+}
+
+.board-box {
+    background: #151527;
+    border-radius: 10px;
+    height: 50vh;
+    padding: .75em 1.25em;
+    overflow: auto;
+}
+
+.msg-li {
+    padding: 1em;
+}
+.ch-li {
+    padding-left: 3em;
+}
+
+#scrollToBottom {
+    float: right;
+}
+
+.choice-box {
+    display: block;
+}
