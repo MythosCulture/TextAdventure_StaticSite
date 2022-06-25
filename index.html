@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TextAdventure</title>
+    <link href="style.css" rel="stylesheet" type="text/css" media="all">
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <nav class="sidebar flex-column">
+        <ul>
+            <li>Calendar: <span id="calendar"></span></li>
+            <li>Actions Left: <span id="actions"></span></li>
+            <li>Health: <span id="health"></span></li>
+            <li>Sanity: <span id="sanity"></span></li>
+            <li>Inventory/Other</li>
+        </ul>
+        <ul>
+            <li style="padding-top: 0px;"><button class="btn menu-btn" id="saveBtn">Save</button></li>
+            <li style="padding-top: 0px;"><button class="btn menu-btn" id="optionsBtn">Options</button></li>
+        </ul>
+    </nav>
+
+    <div class="board">
+        <div class="flex-column">
+            <h1 style="margin: 0;">Board Header</h1>
+
+            <div class="board-box">
+                board box
+                <ul class="board-log">
+                    <!--Messages go here-->
+                </ul>
+            </div>
+            <span id="scrollToBottom">Scroll to Bottom</span>
+
+            <div class="choice-box">
+                <ul>
+                    <li><button class="btn choice-btn" id="choice1">Choice 1</button></li>
+                    <li><button class="btn choice-btn hidden" id="choice2" disabled>Choice 2</button></li>
+                    <li><button class="btn choice-btn hidden" id="choice3" disabled>Choice 3</button></li>
+                    <li><button class="btn choice-btn hidden" id="choice4" disabled>Choice 4</button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal optionsModal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h1>Options</h1>
+                <p>Font</p>
+                <p>Font Size</p>
+                <p>Wipe game data: <button class="btn menu-btn" id="wipeGame">Delete Saved Game</button></p>
+        </div>
+    </div>
+
+    <div class="modal saveModal">
+        <div class="modal-content save-content">
+            <span class="close">&times;</span>
+            <h1>Progress Saved!</h1>
+        </div>
+    </div>
+
+    <script language="javascript" type="module" src="messageArchive.js"></script>
+    <script language="javascript" type="module" src="main.js"></script>
+</body>
+
+</html>
