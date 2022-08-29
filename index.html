@@ -61,7 +61,29 @@
             <h1>Options</h1>
                 <p>Font</p>
                 <p>Font Size</p>
-                <p>Wipe game data: <button class="btn menu-btn" id="wipeGame">Delete Saved Game</button></p>
+                <div>
+                    <h1>Export Game</h1>
+                    <button class="btn menu-btn" id="exportGame">Generate Export Code</button>
+                    <div style="text-align: center;">
+                        <textarea id="exportTxt"></textarea>
+                    </div>
+                </div>
+                <div>
+                    <h1>Load Game</h1>
+                    <p>
+                        <button class="btn menu-btn" id="loadLocal">Load Game</button>
+                    </p>
+                    <p>
+                        <button class="btn menu-btn" id="loadExport">Load Game from Export Code</button>
+                    </p>
+                    <button class="accordion">Section 1</button>
+                    <div class="panel">
+                        <p>Lorem ipsum...</p>
+                    </div>
+                </div>
+                <p>
+                    Wipe game data: <button class="btn menu-btn" id="wipeGame">Delete Saved Game</button>
+                </p>
         </div>
     </div>
 
