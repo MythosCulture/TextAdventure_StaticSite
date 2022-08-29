@@ -79,6 +79,10 @@ ul {
         padding-left: 0;
     }
 }
+
+.grid-container {
+    display: grid;
+  }
 /*------MODALS------*/
 .modal {
     z-index: 1; /* Sit on top */
@@ -100,7 +104,7 @@ ul {
 .modal-content {
     background-color: #551621;
     color: #f2f4f3;
-    margin: 15% auto; /* 15% from the top and centered */
+    margin: auto; /* 15% from the top and centered */
     padding: 20px;
     border: 1px solid #411018;
     width: 60%;
@@ -108,6 +112,7 @@ ul {
 
 .save-content {
     text-align: center;
+    margin: 15% auto; /* 15% from the top and centered */
     width: 30%;
 }
 
@@ -124,7 +129,38 @@ ul {
         text-decoration: none;
         cursor: pointer;
     }
+/*export box*/
+#exportTxt{
+    background-color: #380e15;
+    color: #f2f4f3;
+    border: none;
+    width: 80%; 
+    word-wrap:break-word;
+}
 
+/*Options Menu*/
+.accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 18px;
+    width: 100%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: 0.4s;
+}
+.active, .accordion:hover {
+    background-color: #ccc;
+}
+.panel {
+    padding: 0 18px;
+    background-color: white;
+    color: #151527;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+  }
 
 /*------BOARD------*/
 .board {
