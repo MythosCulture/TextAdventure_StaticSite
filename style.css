@@ -50,7 +50,12 @@ ul {
 }
 
 .flex-column {
-    flex-direction: column !important;
+    flex-direction: column;
+    display: flex;
+}
+.flex-row {
+    flex-direction: row;
+    display: flex;
 }
 
 /*------SIDEBAR------*/
@@ -75,14 +80,22 @@ ul {
         width: 100%;
     }
 
-    .board {
+    #board {
         padding-left: 0;
     }
 }
 
 .grid-container {
     display: grid;
-  }
+    grid-template-columns: 80px 80px;
+    grid-template-rows: 80px 80px;
+}
+.grid-item {
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    padding: 5px;
+}
+
 /*------MODALS------*/
 .modal {
     z-index: 1; /* Sit on top */
@@ -130,7 +143,7 @@ ul {
         cursor: pointer;
     }
 /*export box*/
-#exportTxt{
+#textArea{
     background-color: #380e15;
     color: #f2f4f3;
     border: none;
@@ -153,7 +166,7 @@ ul {
 .active, .accordion:hover {
     background-color: #ccc;
 }
-.panel {
+.acc-panel {
     padding: 0 18px;
     background-color: white;
     color: #151527;
@@ -163,7 +176,7 @@ ul {
   }
 
 /*------BOARD------*/
-.board {
+#board {
     display: block;
     padding-top: 0;
     margin: 0;
@@ -172,7 +185,7 @@ ul {
     color: #b8b293;
 }
 
-.board-box {
+#board-box {
     background: #151527;
     border-radius: 10px;
     height: 50vh;
@@ -188,9 +201,49 @@ ul {
 }
 
 #scrollToBottom {
-    float: right;
+    width: fit-content;   
+    
 }
 
-.choice-box {
+#choice-box {
     display: block;
 }
+
+
+
+/* Style the tab */
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+  }
+  
+  /* Style the buttons inside the tab */
+  .tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+  }
+  
+  /* Change background color of buttons on hover */
+  .tab button:hover {
+    background-color: #ddd;
+  }
+  
+  /* Create an active/current tablink class */
+  .tab button.active {
+    background-color: #ccc;
+  }
+  
+  /* Style the tab content */
+  .tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+  }
