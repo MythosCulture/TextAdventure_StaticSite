@@ -14,9 +14,14 @@ setLocal(default_Stats, "statData");
 setLocal(default_CharInfo, "charData");
 setLocal(default_Inv, "invData");
 
+export {Choices};
 export {Items};
 export {Library};
 
+/**
+ * @param {Object} setObj 
+ * @param {string} setName 
+ */
 export function setLocal (setObj, setName) {
     window.localStorage.setItem(setName, JSON.stringify(setObj));
 }
@@ -25,21 +30,47 @@ export function getLocal (getName) {
     return JSON.parse(window.localStorage.getItem(getName));
 }
 
+/**
+ * @param {Array} list 
+ * @param {*} _id 
+ * @returns Array object
+ */
+export function getObj(list, _id) { //used to retrieve messages or inventory items
+    let objIndex = list.findIndex( function(element) {
+        return element.id === _id;
+    });
+
+    return list[objIndex];
+}
+
+/**
+ * @param {*} _itemId 
+ * @returns array object from Items array
+ */
+function getItem(_itemId) {
+    return getObj(Items, _itemId);
+}
+
+/**
+ * @param {*} _itemId 
+ * @returns list item or undefined
+ */
 function getInvItem(_itemId) { //returns item or undefined
     let localItem = getLocal("invData");
     return localItem.find(item => item.id === _itemId);
 }
+
+/**
+ * @param {*} _itemId 
+ * @returns boolean
+ */
 function hasItem(_itemId) { //True/False
     if (getInvItem(_itemId) == undefined) return false;
     return true;
 }
-function getItem(_itemId) { //same as getObj() in main.js
-    let objIndex = Items.findIndex( function(element) {
-        return element.id === _itemId;
-    });
-    return Items[objIndex];
-}
 
+const Stats = ["Health", "Sanity", "Actions"]; //TODO: have interchangable stat names
+const Choices = ["choice1", "choice2", "choice3", "choice4"];
 const Items = [
     {
         id: 0,
@@ -52,6 +83,7 @@ const Items = [
         description: "This is a description for item 2!"
     }
 ];
+
 const Library = [
     {
         id: "P0_000",
