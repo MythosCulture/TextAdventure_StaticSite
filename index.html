@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>TextAdventure</title>
     <link href="style.css" rel="stylesheet" type="text/css" media="all">
+    <link href="grid_style.css" rel="stylesheet" type="text/css" media="all">
     <style>
 
     </style>
@@ -32,24 +33,29 @@
         </ul>
     </nav>
 
-    <div class="board">
+    <div id="board">
         <div class="flex-column">
             <h1 style="margin: 0;">Board Header</h1>
 
-            <div class="board-box">
+            <div id="board-box">
                 board box
-                <ul class="board-log">
+                <ul id="board-log">
                     <!--Messages go here-->
                 </ul>
             </div>
-            <span id="scrollToBottom">Scroll to Bottom</span>
+            <div style="text-align: right;">            
+                <button id="scrollToBottom">Scroll to Bottom</button>
+            </div>
+            
 
-            <div class="choice-box">
+            <div id="choice-box">
                 <ul>
+                    <!--
                     <li><button class="btn choice-btn" id="choice1">Choice 1</button></li>
                     <li><button class="btn choice-btn hidden" id="choice2" disabled>Choice 2</button></li>
                     <li><button class="btn choice-btn hidden" id="choice3" disabled>Choice 3</button></li>
                     <li><button class="btn choice-btn hidden" id="choice4" disabled>Choice 4</button></li>
+                    -->
                 </ul>
             </div>
         </div>
@@ -58,32 +64,59 @@
     <div class="modal optionsModal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h1>Options</h1>
-                <p>Font</p>
-                <p>Font Size</p>
-                <div>
-                    <h1>Export Game</h1>
-                    <button class="btn menu-btn" id="exportGame">Generate Export Code</button>
-                    <div style="text-align: center;">
-                        <textarea id="exportTxt"></textarea>
+            <div class="tab">
+                <button class="tablinks active" id="Tab1">Game Data</button>
+                <button class="tablinks" id="Tab2">Settings</button>
+                <button class="tablinks" id="Tab3")">TestTab</button>
+            </div>
+
+            <div id="_Tab1" class="tabcontent" style="display: block;">
+                <h3>Game Data</h3>
+                <div class="flex-column">
+                    <div class="flex-row">
+                        <button class="btn" id="loadLocal">Load Local Save</button>
+                        <h3>Load Game</h3>
+                    </div>
+                    <div class="flex-row">
+                        <button class="btn" id="wipeGame">Delete Local Save</button>
+                        <h3>Delete Game</h3>
+                    </div>
+                    <div class="flex-row">
+                        <div>
+                            <label>Load data from file (.txt)</label>
+                            <input type="file" accept=".txt" id="fileInput">
+                        </div>
+                        <div id="filePreview">
+                            <p>No file currently selected.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <textarea id="textArea"></textarea>
+                    </div>
+                    <div class="flex-row">
+                        <button class="btn" id="data_Export">Generate Export Code</button>
+                        <button class="btn" id="data_Load">Load Game from Export Code</button>
+                        <button class="btn" id="clearDataTxt">Clear</button>
                     </div>
                 </div>
-                <div>
-                    <h1>Load Game</h1>
-                    <p>
-                        <button class="btn menu-btn" id="loadLocal">Load Game</button>
-                    </p>
-                    <p>
-                        <button class="btn menu-btn" id="loadExport">Load Game from Export Code</button>
-                    </p>
+                <!-- Accordian
                     <button class="accordion">Section 1</button>
-                    <div class="panel">
+                    <div class="acc-panel">
                         <p>Lorem ipsum...</p>
                     </div>
-                </div>
-                <p>
-                    Wipe game data: <button class="btn menu-btn" id="wipeGame">Delete Saved Game</button>
-                </p>
+                -->
+            </div>
+            <div id="_Tab2" class="tabcontent">
+                <h3>Settings</h3>
+                <p>Font</p>
+                <p>Font Size</p>
+                <p>Theme</p>
+            </div>
+            <div id="_Tab3" class="tabcontent">
+                <h3>TestTab</h3>
+                <p>Test tab content here.</p>
+            </div>
+
         </div>
     </div>
 
