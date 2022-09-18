@@ -1,0 +1,62 @@
+TODO:
+    Save
+        - auto save
+    Export
+        - add character stats to export data
+        - add character info to export data
+        - add inventory to export data
+        - add settings to export data (?)
+    Options
+        - add Font, Font Size, export Save options
+        - add "Are you sure?" screen, Y/N should return true/false
+    Stats
+        - add name and pronouns to sidebar / add input to change
+        How will actions work? How will the calendar/timekeeping work?
+        - change updateStatDisplay() so that stat names are interchangable
+    Inventory 
+        - add inventory box
+    Library
+        - change how stats are pulled, currently pull from local which isnt saved after every choice.
+    NPC 
+        - figure out npc affinity behavior
+    Other 
+        - Expand Key Events Idea
+        - Implement calendar
+        - rename messageArchive.js to something more relevant
+
+IDEAS:
+    - Personality options that change choices or change how characters respond to you.
+
+COMPLETED TASKS
+    Save 
+        - add saving (local storage) (6/20)
+        - add save confirmation modal (6/20)
+    Export
+        - worked on encoding for export save (7/7)
+        - added export text box/fixed formatting for modals (7/7)
+        - added export function (8/29)
+    Load 
+        - add loading from local storage (6/20)
+        - add loading from file to textarea (9/1)
+        - load local button added to Options modal (9/1)
+    Options 
+        - add Wipe Save button (6/20)
+        - added confirm (y/n) to load and wipegame buttons (9/18)
+    Inventory
+        - added inventory variable + functions to pull information for use in Library objects (9/16)
+        - expanded executeMessage function to modify stats and add/remove from inv (9/18)
+    Log Display 
+        - add choice picked to log display w/o adding it to log variable (6/19)
+        - reset display function (6/20)
+    Library
+        - link main.js to messageArchive.js so that list of messages doesn't need to be in main file (6/22)
+        - added modifyStat key to library objects for handling stats & inv (9/18)
+    Other
+        - updated game data variables to have defaults that load when there is no local storage (6/20)
+        - moved const value defaults to messageArchive.js & added local storage functions to share across files (7/1)
+        - accordian for load export test closes when option modal is closed (7/7)
+        - added string breaker (7/7)
+        - changed log to a list of messageIDs & updated code that interacted w/ it (8/29)
+        - added getStoryObj(msgID) function to retrieve object form Libary (8/29)
+        - organized & created variables for retrieving DOM elements (9/1)
+        - added scroll to bottom button for scroll bar (9/1)
