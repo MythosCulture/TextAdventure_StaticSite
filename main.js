@@ -1,16 +1,19 @@
 import { Library } from './messageArchive.js';
 import { Items } from './messageArchive.js';
-import { Choices } from './messageArchive.js';
+import { choices } from './messageArchive.js';
+
+import { log } from './messageArchive.js';
+import { stats } from './messageArchive.js';
+import { charInfo } from './messageArchive.js';
+import { inventory } from './messageArchive.js';
 
 import { setLocal } from './messageArchive.js';
 import { getLocal } from './messageArchive.js';
-import { getObj } from './messageArchive.js';
 
-var settings;
-var log;
-var stats;
-var charInfo;
-var inv;
+let playerLog = log;
+let playerStats = stats;
+let characterInfo = charInfo;
+let inv = inventory;
 
 ////////DOM VARIABLES////////
 const board =               document.getElementById("board");
@@ -29,28 +32,29 @@ const sidebar_options =     document.getElementById("optionsBtn");
 const modal_save =          document.getElementsByClassName("saveModal")[0];
 const modal_options =       document.getElementsByClassName("optionsModal")[0];
 const modal_saveClose =     document.getElementsByClassName("close")[1];
+const modal_optionsClose =  document.getElementsByClassName("close")[0];
 
 const tablinks_Arr =        document.getElementsByClassName("tablinks");
 const tabContent_Arr =      document.getElementsByClassName("tabcontent");
 
-const data_loadLocal =      document.getElementById("loadLocal");
-const data_wipeGame =       document.getElementById("wipeGame");
-const data_fileInput =      document.getElementById('fileInput');
-const data_filePreview =    document.getElementById('filePreview');
-const data_textarea =       document.getElementById('textArea');
-const data_exportLog =      document.getElementById("data_Export");
-const data_loadLog =        document.getElementById("data_Load");
+const loadLocal =           document.getElementById("loadLocal");
+const wipeGameBtn =            document.getElementById("wipeGame");
+const fileInput =           document.getElementById('fileInput');
+const filePreview =         document.getElementById('filePreview');
+const dataTextArea =        document.getElementById('textArea');
+const exportGameBtn =          document.getElementById("data_Export");
+const loadExternal =        document.getElementById("data_Load");
 
 ////////EVENTLISTENERS////////
 board_scroll.addEventListener("click", () => scrollToBottom(board_box));
-for(let i = 0; i < Choices.length; i++) {
+for(let i = 0; i < choices.length; i++) {
     let listItem = document.createElement('l');
     let button = document.createElement('button');
 
-    button.id = Choices[i];
+    button.id = choices[i];
     button.disabled = true;
     button.classList.add("btn","choice-btn");
-    button.innerHTML = Choices[i];
+    button.innerHTML = choices[i];
     button.addEventListener("click", (event) => {executeMessage(event.target.id)});
 
     listItem.appendChild(button);
@@ -85,14 +89,16 @@ modal_optionsClose.addEventListener("click", () => modal_options.style.display =
 //modal_confirmClose.addEventListener("click", () => modal_confirm.style.display = "none");
 
 for (let i = 0; i < tablinks_Arr.length; i++) {
-    tablinks_Arr[i].addEventListener("click", (event) => {openTab(event,"_"+event.target.id)});
+    tablinks_Arr[i].addEventListener("click", (event) => {
+        openTab(event,"_" + event.target.id)
+    });
 }
 
-data_loadLocal.addEventListener("click", () => triggerConfirm(loadGame, 'Are you sure you want to load? This will overwrite current progress.'));
-data_wipeGame.addEventListener("click", () => triggerConfirm(wipeGame, 'Are you sure you want to wipe your save data?'));
-data_exportLog.addEventListener("click", () => data_textarea.innerHTML = exportGame());
+loadLocal.addEventListener("click", () => triggerConfirm(loadGame, 'Are you sure you want to load? This will overwrite current progress.'));
+wipeGameBtn.addEventListener("click", () => triggerConfirm(wipeGame, 'Are you sure you want to wipe your save data?'));
+exportGameBtn.addEventListener("click", () => dataTextArea.innerHTML = exportGame());
 //input.style.opacity = 0; //figure out how to style later
-data_fileInput.addEventListener("change", () => updateFileInput());
+fileInput.addEventListener("change", () => updateFileInput());
 
 ////////UTILITY FUNCTIONS////////
 function scrollToBottom(scrollBox) {
@@ -156,9 +162,9 @@ var breakString = (str, limit) => {
   * Save log, stats, npcs & character info lists to local storage
   */
 function saveGame() {
-    setLocal(log,       "logData");
-    setLocal(stats,     "statData");
-    setLocal(charInfo,  "charData");
+    setLocal(playerLog,       "logData");
+    setLocal(playerStats,     "statData");
+    setLocal(characterInfo,  "charData");
     setLocal(inv,       "invData");
 }
 /**
@@ -167,23 +173,23 @@ function saveGame() {
 function loadGame() {
     resetDisplay();
 
-    let localLog =  getLocal("logData");
-    let localStat = getLocal("statData");
-    let localChar = getLocal("charData");
-    let localInv =  getLocal("invData");
+    //load object values from local storage
+    //playerLog.loadCache.bind(playerLog);
+    playerLog.loadCache();
+    playerStats.loadCache();
+    characterInfo.loadCache();
+    inv.loadCache();
 
-    //load lists from local storage
-    log =       localLog;
-    stats =     localStat;
-    charInfo =  localChar;
-    inv =       localInv;
+    console.log(playerStats);
+    playerStats.modHealth(-10);
 
-    let lastLog = log[log.length-1];
+    const last = playerLog.getLastMessage(); 
+    //let lastLog = log[log.length-1];
 
-    updateStatDisplay(stats);
+    updateStatDisplay(playerStats);
     //TODO: ADD INVENTORY TO DISPLAY TOO
-    addToDisplay( getObj(Library, lastLog).message, "msg-li" );
-    setUpChoices( getObj(Library, lastLog) );
+    addToDisplay( last.message, "msg-li" );
+    setUpChoices( last );
 }
 
 function loadFromTextArea() {
@@ -201,69 +207,68 @@ function exportGame() {
 }
 
 function updateFileInput() {
-    while(data_filePreview.firstChild) {
-        data_filePreview.removeChild(data_filePreview.firstChild);
+    while(filePreview.firstChild) {
+        filePreview.removeChild(filePreview.firstChild);
       }
 
-    const files =   data_fileInput.files;
+    const files =   fileInput.files;
     const para =    document.createElement('p');
 
-    if (files.length == 0) {
+    if (files.length === 0) {
         para.textContent = 'No file currently selected.';
-        data_filePreview.appendChild(para);
+        filePreview.appendChild(para);
     } else {
         const file = files[0];
 
         if(validateFile(file)){ //validate file type & populate contents into text area
             let reader = new FileReader();
             reader.addEventListener("load", () =>{
-                data_textarea.innerText = reader.result;
+                dataTextArea.innerText = reader.result;
             });
             reader.onerror = (e) => alert(e.target.error.name);
             reader.readAsText(file);
             
             para.textContent = file.name; //TODO: returning 'file is undefined' when submitting .txt
-            data_filePreview.appendChild(para);
+            filePreview.appendChild(para);
         } else { //invalid file type
             para.textContent = `Error, ${file.name}: Not a valid file type. Update your selection.`;
-            data_filePreview.appendChild(para);
+            filePreview.appendChild(para);
         }
     }
 }
-function validateLog(_log) {
+function validateLog(log) { //change_log
     let message;
     let next;
 
-    for (let i = 0; i < _log.length; i++) {
-        if (i+1 < _log.length)
-        {
-            message = getObj(Library, _log[i]);
-            next = getObj(Library, _log[i+1]);
-            let vChoice = false;
+    for (let i = 0; i < log.all.length - 1; i++) {
+        message = log.getMessageAt(i);
+        next = log.getMessageAt(i+1);
+        let validChoice = false;
 
-            Choices.forEach(choice => {
-                if (message[choice].nextMsgId == next) {
-                    vChoice = true;
-                }
-            });
-
-            if (vChoice == false) {
-                console.log ("INVALID LOG");
-                console.log("Message ID: " + message);
-                console.log("Next message ID: " + next);
-                return false;
+        for (let choice in choices) {
+            if (message[choice].nextMsgId === next.id) {
+                validChoice = true;
+                break;
             }
+        }
+
+        if (validChoice === false) {
+            console.log ("INVALID LOG");
+            console.log("Message ID: " + message.id);
+            console.log("Next message ID: " + next.id);
+            return false;
         }
     }
     return true;
 }
 
-function wipeGame() { //set local storage to defaults
-    setLocal("logData",     window.localStorage.getItem("logDefault"));
-    setLocal("statData",    window.localStorage.getItem("statDefault"));
-    setLocal("charData",    window.localStorage.getItem("charDefault"));
-    setLocal("invData",     window.localStorage.getItem("invDefault"));
+function wipeGame() { //reset stat values & local data to defaults
+    playerLog =       getLocal('logDefault');
+    playerStats =     getLocal('statDefault');
+    characterInfo =  getLocal('charDefault');
+    inv =       getLocal('invDefault');
 
+    saveGame();
     loadGame(); //resets displays to default info
 }
 
@@ -277,9 +282,10 @@ function resetDisplay() { //Delete all items with the "board-li" class
 function updateStatDisplay(statObj) { //updates display on sidebar to match stats
     //TODO: stat names should be interchangable
     //stat_calendar.innerHTML =  //implement calendar stat
-    stat_actions.innerHTML = statObj.Actions;
-    stat_health.innerHTML = statObj.Health;
-    stat_sanity.innerHTML = statObj.Sanity;
+    stat_actions.innerHTML = statObj.actions;
+    stat_health.innerHTML = statObj.health;
+    stat_sanity.innerHTML = statObj.sanity;
+    //TODO: add inventory here
 }
 function addToDisplay(content, classToAssign) {
     const element = document.createElement("li");
@@ -292,7 +298,7 @@ function addToDisplay(content, classToAssign) {
 }
 function setUpChoices(storyObj) {
     //cycle through choiceList, hide/disable choices that are undefined
-    Choices.forEach(choice => {
+    choices.forEach(choice => {
         let element = document.getElementById(choice);
         if (storyObj[choice] === undefined) { //no choice defined
             element.disabled = true;
@@ -305,34 +311,47 @@ function setUpChoices(storyObj) {
     });
 }
 function executeMessage(choiceString) {
-    //add the clicked choice to board box w/ the ch-li class name
+    //adds the clicked choice to board box w/ the ch-li class name
     const choiceTxt = document.getElementById(choiceString).innerHTML;
     addToDisplay("> "+ choiceTxt, "ch-li");
 
-    let last = getObj(Library, log[log.length-1]);
-    let next = getObj(Library, last[choiceString].nextMsgId);
+    let last = playerLog.getLastMessage();
+    let next = Library.getMessage(last[choiceString].nextMsgId);
     let modifyStat = next.modifyStat;
     
     if (modifyStat) {
         for (let i = 0; i < modifyStat.length; i++) {
-            const element = modifyStat[i];
-            let key = element[0];
-            let value = element[1];
-            
-            if (key == "Inv") { //add inventory item
-                inv.push(value);
-            } else if (key == "InvRemove") { //remove inventory item
-                let index = inv.indexOf(value);
-                inv.splice(index, 1);
-            } else { // Otherwise, add value to indicated stat
-                stats[key] += value;
-            }
+            const ele = modifyStat[i];
+            updateStats(ele[0], ele[1], ele[2]);
         }
     }
 
-    log.push(next.id);
+    playerLog.addMessage(next.id);
     addToDisplay(next.message, "msg-li"); //add message to board box from updated log
     setUpChoices(next);
+}
+
+function updateStats(objectName, funcName, value) {
+    if(objectName === "stats") {
+        if(funcName === "modHealth") {
+            console.log("Inside updateStats. Health: " + playerStats.health);
+            console.log(value);
+            playerStats.modHealth(value);
+        } else {
+            console.log(`${objectName}.${funcName} not handled.`);
+        }
+    } else if (objectName === "inventory") {
+        console.log("inv.hasItem: " + inv.hasItem(value));
+        if(funcName === "addItem") {
+            inv.addItem(value);
+        } else if (funcName === "removeItem") {
+            inv.removeItem(value);
+        } else {
+            console.log(`${objectName}.${funcName} not handled.`);
+        }
+    } else {
+        console.log(`${objectName}.${funcName} not handled.`);
+    }
 }
 
 function openTab(event, tabId) {
