@@ -1,19 +1,11 @@
-import { Library } from './messageArchive.js';
-import { Items } from './messageArchive.js';
-import { choices } from './messageArchive.js';
+import { Library } from './gameObjects.js';
+import { choices } from './gameObjects.js';
+import { playerObject } from './gameObjects.js';
 
-import { log } from './messageArchive.js';
-import { stats } from './messageArchive.js';
-import { charInfo } from './messageArchive.js';
-import { inventory } from './messageArchive.js';
+import { setLocal } from './gameObjects.js';
+import { getLocal } from './gameObjects.js';
 
-import { setLocal } from './messageArchive.js';
-import { getLocal } from './messageArchive.js';
-
-let playerLog = log;
-let playerStats = stats;
-let characterInfo = charInfo;
-let inv = inventory;
+let player = playerObject;
 
 ////////DOM VARIABLES////////
 const board =               document.getElementById("board");
@@ -55,7 +47,7 @@ for(let i = 0; i < choices.length; i++) {
     button.disabled = true;
     button.classList.add("btn","choice-btn");
     button.innerHTML = choices[i];
-    button.addEventListener("click", (event) => {executeMessage(event.target.id)});
+    button.addEventListener("click", (event) => {executeNextPrompt(event.target.id)});
 
     listItem.appendChild(button);
     choicebox.firstElementChild.appendChild(listItem);
@@ -67,7 +59,6 @@ sidebar_save.addEventListener("click", () => {
     modal_save.style.display = "block";
 });
 sidebar_options.addEventListener("click", () => {
-    //TODO: add confirmation
     modal_options.style.display = "block"
 });
 
@@ -116,57 +107,19 @@ function triggerConfirm(func, message) {
     }
 }
 
-var breakString_SPC = (str, limit) => { //break on spaces
-    let brokenString = '';
-    for(let i = 0, count = 0; i < str.length; i++){
-
-        if(str[i]===' ') {
-            var j = 1;
-            while (str[i+j] != ' ') {
-                j++;
-            }
-            
-            if (count + j > limit) {
-                count = 0;
-                brokenString += '\n';
-            } else {
-                count++;
-                brokenString += str[i];
-            }
-        } else {
-            count++;
-            brokenString += str[i];
-        }
-    }
-    return brokenString;
- }
-
-var breakString = (str, limit) => {
-    let brokenString = '';
-    for(let i = 0, count = 0; i < str.length; i++){
-
-        if(count == limit) {
-            count = 0;
-            brokenString += '<br>';
-        } else {
-            count++;
-            brokenString += str[i];
-        }
-    }
-    return brokenString;
- }
-
- /*Save & Load Game*/
-
- /**
-  * Save log, stats, npcs & character info lists to local storage
-  */
-function saveGame() {
-    setLocal(playerLog,       "logData");
-    setLocal(playerStats,     "statData");
-    setLocal(characterInfo,  "charData");
-    setLocal(inv,       "invData");
+function getLastPrompt() {
+    return Library.getPrompt(player.log[player.log.length - 1].id);
 }
+
+function possibleFunction(object) {
+    if(object instanceof Function) return object(player);
+    return object;
+}
+
+function saveGame() {
+    setLocal(player, "playerSave");
+}
+
 /**
  * resetDisplay then load form local storage or defaults
  */
@@ -174,22 +127,13 @@ function loadGame() {
     resetDisplay();
 
     //load object values from local storage
-    //playerLog.loadCache.bind(playerLog);
-    playerLog.loadCache();
-    playerStats.loadCache();
-    characterInfo.loadCache();
-    inv.loadCache();
+    player = getLocal("playerSave");
+    console.log(player); //delete later
 
-    console.log(playerStats);
-    playerStats.modHealth(-10);
-
-    const last = playerLog.getLastMessage(); 
-    //let lastLog = log[log.length-1];
-
-    updateStatDisplay(playerStats);
-    //TODO: ADD INVENTORY TO DISPLAY TOO
-    addToDisplay( last.message, "msg-li" );
-    setUpChoices( last );
+    updateStatDisplay(player);
+    //TODO: ADD INVENTORY UPDATING
+    addToDisplay( player.log[player.log.length - 1].message, "msg-li" );
+    setUpChoices( getLastPrompt());
 }
 
 function loadFromTextArea() {
@@ -202,8 +146,9 @@ function loadFromTextArea() {
 }
 
 function exportGame() {
-    saveGame(); // save to local first, then export
-    return getLocal("logData");
+    saveGame(); 
+    //TODO: Prints "[Object object]" need to update how exporting works anyways
+    return getLocal("playerSave");
 }
 
 function updateFileInput() {
@@ -262,19 +207,16 @@ function validateLog(log) { //change_log
     return true;
 }
 
-function wipeGame() { //reset stat values & local data to defaults
-    playerLog =       getLocal('logDefault');
-    playerStats =     getLocal('statDefault');
-    characterInfo =  getLocal('charDefault');
-    inv =       getLocal('invDefault');
+function wipeGame() { //reset player object & local save to defaults
+    player = playerObject;
 
     saveGame();
-    loadGame(); //resets displays to default info
+    loadGame();
 }
 
 /*Game functions*/
 
-function resetDisplay() { //Delete all items with the "board-li" class
+function resetDisplay() { //Remove all items with the "board-li" class
     while(board_list.firstChild) {
         board_list.removeChild(board_list.firstChild);
     }
@@ -296,62 +238,42 @@ function addToDisplay(content, classToAssign) {
     //Scroll to bottom
     scrollToBottom(board_box);
 }
-function setUpChoices(storyObj) {
+function setUpChoices(libraryPrompt) { //TODO: UPDATE
     //cycle through choiceList, hide/disable choices that are undefined
     choices.forEach(choice => {
-        let element = document.getElementById(choice);
-        if (storyObj[choice] === undefined) { //no choice defined
+        const element = document.getElementById(choice);
+        let promptChoice = possibleFunction(libraryPrompt[choice]);
+        
+        if (promptChoice === undefined) { //no choice defined
             element.disabled = true;
             element.classList.add("hidden");
         } else { //choice defined
             element.disabled = false;
             element.classList.remove("hidden");
-            element.innerHTML = storyObj[choice].buttonText;
+            element.innerHTML = promptChoice.buttonText;
         }
     });
 }
-function executeMessage(choiceString) {
-    //adds the clicked choice to board box w/ the ch-li class name
+
+function executeNextPrompt(choiceString) {
+    const lastChoice = possibleFunction(getLastPrompt()[choiceString]);
+    const next = Library.getPrompt(lastChoice.nextId); //next prompt
+    const nextMessage = possibleFunction(next.message);
+
+    if (next.modifyStats) player = next.modifyStats(player);
+
+    console.log(next);
+    //add choice obj to last log obj in player
+    player.log[player.log.length - 1][choiceString] = lastChoice;
+    player.log.push({
+        id: next.id,
+        message: nextMessage
+    });
+
     const choiceTxt = document.getElementById(choiceString).innerHTML;
     addToDisplay("> "+ choiceTxt, "ch-li");
-
-    let last = playerLog.getLastMessage();
-    let next = Library.getMessage(last[choiceString].nextMsgId);
-    let modifyStat = next.modifyStat;
-    
-    if (modifyStat) {
-        for (let i = 0; i < modifyStat.length; i++) {
-            const ele = modifyStat[i];
-            updateStats(ele[0], ele[1], ele[2]);
-        }
-    }
-
-    playerLog.addMessage(next.id);
-    addToDisplay(next.message, "msg-li"); //add message to board box from updated log
+    addToDisplay(nextMessage, "msg-li"); //add message to board box from updated log
     setUpChoices(next);
-}
-
-function updateStats(objectName, funcName, value) {
-    if(objectName === "stats") {
-        if(funcName === "modHealth") {
-            console.log("Inside updateStats. Health: " + playerStats.health);
-            console.log(value);
-            playerStats.modHealth(value);
-        } else {
-            console.log(`${objectName}.${funcName} not handled.`);
-        }
-    } else if (objectName === "inventory") {
-        console.log("inv.hasItem: " + inv.hasItem(value));
-        if(funcName === "addItem") {
-            inv.addItem(value);
-        } else if (funcName === "removeItem") {
-            inv.removeItem(value);
-        } else {
-            console.log(`${objectName}.${funcName} not handled.`);
-        }
-    } else {
-        console.log(`${objectName}.${funcName} not handled.`);
-    }
 }
 
 function openTab(event, tabId) {
