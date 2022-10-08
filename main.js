@@ -1,16 +1,11 @@
-import { Library } from './messageArchive.js';
-import { Items } from './messageArchive.js';
-import { Choices } from './messageArchive.js';
+import { Library } from './gameObjects.js';
+import { choices } from './gameObjects.js';
+import { playerObject } from './gameObjects.js';
 
-import { setLocal } from './messageArchive.js';
-import { getLocal } from './messageArchive.js';
-import { getObj } from './messageArchive.js';
+import { setLocal } from './gameObjects.js';
+import { getLocal } from './gameObjects.js';
 
-var settings;
-var log;
-var stats;
-var charInfo;
-var inv;
+let player = playerObject;
 
 ////////DOM VARIABLES////////
 const board =               document.getElementById("board");
@@ -29,29 +24,30 @@ const sidebar_options =     document.getElementById("optionsBtn");
 const modal_save =          document.getElementsByClassName("saveModal")[0];
 const modal_options =       document.getElementsByClassName("optionsModal")[0];
 const modal_saveClose =     document.getElementsByClassName("close")[1];
+const modal_optionsClose =  document.getElementsByClassName("close")[0];
 
 const tablinks_Arr =        document.getElementsByClassName("tablinks");
 const tabContent_Arr =      document.getElementsByClassName("tabcontent");
 
-const data_loadLocal =      document.getElementById("loadLocal");
-const data_wipeGame =       document.getElementById("wipeGame");
-const data_fileInput =      document.getElementById('fileInput');
-const data_filePreview =    document.getElementById('filePreview');
-const data_textarea =       document.getElementById('textArea');
-const data_exportLog =      document.getElementById("data_Export");
-const data_loadLog =        document.getElementById("data_Load");
+const loadLocal =           document.getElementById("loadLocal");
+const wipeGameBtn =            document.getElementById("wipeGame");
+const fileInput =           document.getElementById('fileInput');
+const filePreview =         document.getElementById('filePreview');
+const dataTextArea =        document.getElementById('textArea');
+const exportGameBtn =          document.getElementById("data_Export");
+const loadExternal =        document.getElementById("data_Load");
 
 ////////EVENTLISTENERS////////
 board_scroll.addEventListener("click", () => scrollToBottom(board_box));
-for(let i = 0; i < Choices.length; i++) {
+for(let i = 0; i < choices.length; i++) {
     let listItem = document.createElement('l');
     let button = document.createElement('button');
 
-    button.id = Choices[i];
+    button.id = choices[i];
     button.disabled = true;
     button.classList.add("btn","choice-btn");
-    button.innerHTML = Choices[i];
-    button.addEventListener("click", (event) => {executeMessage(event.target.id)});
+    button.innerHTML = choices[i];
+    button.addEventListener("click", (event) => {executeNextPrompt(event.target.id)});
 
     listItem.appendChild(button);
     choicebox.firstElementChild.appendChild(listItem);
@@ -63,7 +59,6 @@ sidebar_save.addEventListener("click", () => {
     modal_save.style.display = "block";
 });
 sidebar_options.addEventListener("click", () => {
-    //TODO: add confirmation
     modal_options.style.display = "block"
 });
 
@@ -85,14 +80,16 @@ modal_optionsClose.addEventListener("click", () => modal_options.style.display =
 //modal_confirmClose.addEventListener("click", () => modal_confirm.style.display = "none");
 
 for (let i = 0; i < tablinks_Arr.length; i++) {
-    tablinks_Arr[i].addEventListener("click", (event) => {openTab(event,"_"+event.target.id)});
+    tablinks_Arr[i].addEventListener("click", (event) => {
+        openTab(event,"_" + event.target.id)
+    });
 }
 
-data_loadLocal.addEventListener("click", () => triggerConfirm(loadGame, 'Are you sure you want to load? This will overwrite current progress.'));
-data_wipeGame.addEventListener("click", () => triggerConfirm(wipeGame, 'Are you sure you want to wipe your save data?'));
-data_exportLog.addEventListener("click", () => data_textarea.innerHTML = exportGame());
+loadLocal.addEventListener("click", () => triggerConfirm(loadGame, 'Are you sure you want to load? This will overwrite current progress.'));
+wipeGameBtn.addEventListener("click", () => triggerConfirm(wipeGame, 'Are you sure you want to wipe your save data?'));
+exportGameBtn.addEventListener("click", () => dataTextArea.innerHTML = exportGame());
 //input.style.opacity = 0; //figure out how to style later
-data_fileInput.addEventListener("change", () => updateFileInput());
+fileInput.addEventListener("change", () => updateFileInput());
 
 ////////UTILITY FUNCTIONS////////
 function scrollToBottom(scrollBox) {
@@ -110,80 +107,33 @@ function triggerConfirm(func, message) {
     }
 }
 
-var breakString_SPC = (str, limit) => { //break on spaces
-    let brokenString = '';
-    for(let i = 0, count = 0; i < str.length; i++){
-
-        if(str[i]===' ') {
-            var j = 1;
-            while (str[i+j] != ' ') {
-                j++;
-            }
-            
-            if (count + j > limit) {
-                count = 0;
-                brokenString += '\n';
-            } else {
-                count++;
-                brokenString += str[i];
-            }
-        } else {
-            count++;
-            brokenString += str[i];
-        }
-    }
-    return brokenString;
- }
-
-var breakString = (str, limit) => {
-    let brokenString = '';
-    for(let i = 0, count = 0; i < str.length; i++){
-
-        if(count == limit) {
-            count = 0;
-            brokenString += '<br>';
-        } else {
-            count++;
-            brokenString += str[i];
-        }
-    }
-    return brokenString;
- }
-
- /*Save & Load Game*/
-
- /**
-  * Save log, stats, npcs & character info lists to local storage
-  */
-function saveGame() {
-    setLocal(log,       "logData");
-    setLocal(stats,     "statData");
-    setLocal(charInfo,  "charData");
-    setLocal(inv,       "invData");
+function getLastPrompt() {
+    return Library.getPrompt(player.log[player.log.length - 1].id);
 }
+
+function possibleFunction(object) {
+    if(object instanceof Function) return object(player);
+    return object;
+}
+
+function saveGame() {
+    setLocal(player, "playerSave");
+}
+
 /**
  * resetDisplay then load form local storage or defaults
  */
 function loadGame() {
     resetDisplay();
 
-    let localLog =  getLocal("logData");
-    let localStat = getLocal("statData");
-    let localChar = getLocal("charData");
-    let localInv =  getLocal("invData");
+    //load object values from local storage
+    player = getLocal("playerSave");
+    console.log(player); //delete later
 
-    //load lists from local storage
-    log =       localLog;
-    stats =     localStat;
-    charInfo =  localChar;
-    inv =       localInv;
-
-    let lastLog = log[log.length-1];
-
-    updateStatDisplay(stats);
-    //TODO: ADD INVENTORY TO DISPLAY TOO
-    addToDisplay( getObj(Library, lastLog).message, "msg-li" );
-    setUpChoices( getObj(Library, lastLog) );
+    updateStatDisplay(player);
+    //TODO: ADD INVENTORY UPDATING
+    addToDisplay( player.log[player.log.length - 1].message, "msg-li" );
+    setUpChoices( getLastPrompt());
 }
 
 function loadFromTextArea() {
@@ -196,80 +146,77 @@ function loadFromTextArea() {
 }
 
 function exportGame() {
-    saveGame(); // save to local first, then export
-    return getLocal("logData");
+    saveGame(); 
+    //TODO: Prints "[Object object]" need to update how exporting works anyways
+    return getLocal("playerSave");
 }
 
 function updateFileInput() {
-    while(data_filePreview.firstChild) {
-        data_filePreview.removeChild(data_filePreview.firstChild);
+    while(filePreview.firstChild) {
+        filePreview.removeChild(filePreview.firstChild);
       }
 
-    const files =   data_fileInput.files;
+    const files =   fileInput.files;
     const para =    document.createElement('p');
 
-    if (files.length == 0) {
+    if (files.length === 0) {
         para.textContent = 'No file currently selected.';
-        data_filePreview.appendChild(para);
+        filePreview.appendChild(para);
     } else {
         const file = files[0];
 
         if(validateFile(file)){ //validate file type & populate contents into text area
             let reader = new FileReader();
             reader.addEventListener("load", () =>{
-                data_textarea.innerText = reader.result;
+                dataTextArea.innerText = reader.result;
             });
             reader.onerror = (e) => alert(e.target.error.name);
             reader.readAsText(file);
             
             para.textContent = file.name; //TODO: returning 'file is undefined' when submitting .txt
-            data_filePreview.appendChild(para);
+            filePreview.appendChild(para);
         } else { //invalid file type
             para.textContent = `Error, ${file.name}: Not a valid file type. Update your selection.`;
-            data_filePreview.appendChild(para);
+            filePreview.appendChild(para);
         }
     }
 }
-function validateLog(_log) {
+function validateLog(log) { //change_log
     let message;
     let next;
 
-    for (let i = 0; i < _log.length; i++) {
-        if (i+1 < _log.length)
-        {
-            message = getObj(Library, _log[i]);
-            next = getObj(Library, _log[i+1]);
-            let vChoice = false;
+    for (let i = 0; i < log.all.length - 1; i++) {
+        message = log.getMessageAt(i);
+        next = log.getMessageAt(i+1);
+        let validChoice = false;
 
-            Choices.forEach(choice => {
-                if (message[choice].nextMsgId == next) {
-                    vChoice = true;
-                }
-            });
-
-            if (vChoice == false) {
-                console.log ("INVALID LOG");
-                console.log("Message ID: " + message);
-                console.log("Next message ID: " + next);
-                return false;
+        for (let choice in choices) {
+            if (message[choice].nextMsgId === next.id) {
+                validChoice = true;
+                break;
             }
+        }
+
+        if (validChoice === false) {
+            console.log ("INVALID LOG");
+            console.log("Message ID: " + message.id);
+            console.log("Next message ID: " + next.id);
+            return false;
         }
     }
     return true;
 }
 
-function wipeGame() { //set local storage to defaults
-    setLocal("logData",     window.localStorage.getItem("logDefault"));
-    setLocal("statData",    window.localStorage.getItem("statDefault"));
-    setLocal("charData",    window.localStorage.getItem("charDefault"));
-    setLocal("invData",     window.localStorage.getItem("invDefault"));
+function wipeGame() { //reset player object & local save to defaults
+    player = playerObject;
 
-    loadGame(); //resets displays to default info
+    saveGame();
+    loadGame();
 }
 
 /*Game functions*/
 
-function resetDisplay() { //Delete all items with the "board-li" class
+function resetDisplay() { //Remove all items with the "board-li" class
     while(board_list.firstChild) {
         board_list.removeChild(board_list.firstChild);
     }
@@ -277,9 +224,10 @@ function resetDisplay() { //Delete all items with the "board-li" class
 function updateStatDisplay(statObj) { //updates display on sidebar to match stats
     //TODO: stat names should be interchangable
     //stat_calendar.innerHTML =  //implement calendar stat
-    stat_actions.innerHTML = statObj.Actions;
-    stat_health.innerHTML = statObj.Health;
-    stat_sanity.innerHTML = statObj.Sanity;
+    stat_actions.innerHTML = statObj.actions;
+    stat_health.innerHTML = statObj.health;
+    stat_sanity.innerHTML = statObj.sanity;
+    //TODO: add inventory here
 }
 function addToDisplay(content, classToAssign) {
     const element = document.createElement("li");
@@ -290,48 +238,41 @@ function addToDisplay(content, classToAssign) {
     //Scroll to bottom
     scrollToBottom(board_box);
 }
-function setUpChoices(storyObj) {
+function setUpChoices(libraryPrompt) { //TODO: UPDATE
     //cycle through choiceList, hide/disable choices that are undefined
-    Choices.forEach(choice => {
-        let element = document.getElementById(choice);
-        if (storyObj[choice] === undefined) { //no choice defined
+    choices.forEach(choice => {
+        const element = document.getElementById(choice);
+        let promptChoice = possibleFunction(libraryPrompt[choice]);
+        
+        if (promptChoice === undefined) { //no choice defined
             element.disabled = true;
             element.classList.add("hidden");
         } else { //choice defined
             element.disabled = false;
             element.classList.remove("hidden");
-            element.innerHTML = storyObj[choice].buttonText;
+            element.innerHTML = promptChoice.buttonText;
         }
     });
 }
-function executeMessage(choiceString) {
-    //add the clicked choice to board box w/ the ch-li class name
+
+function executeNextPrompt(choiceString) {
+    const lastChoice = possibleFunction(getLastPrompt()[choiceString]);
+    const next = Library.getPrompt(lastChoice.nextId); //next prompt
+    const nextMessage = possibleFunction(next.message);
+
+    if (next.modifyStats) player = next.modifyStats(player);
+
+    console.log(next);
+    //add choice obj to last log obj in player
+    player.log[player.log.length - 1][choiceString] = lastChoice;
+    player.log.push({
+        id: next.id,
+        message: nextMessage
+    });
+
     const choiceTxt = document.getElementById(choiceString).innerHTML;
     addToDisplay("> "+ choiceTxt, "ch-li");
-
-    let last = getObj(Library, log[log.length-1]);
-    let next = getObj(Library, last[choiceString].nextMsgId);
-    let modifyStat = next.modifyStat;
-    
-    if (modifyStat) {
-        for (let i = 0; i < modifyStat.length; i++) {
-            const element = modifyStat[i];
-            let key = element[0];
-            let value = element[1];
-            
-            if (key == "Inv") { //add inventory item
-                inv.push(value);
-            } else if (key == "InvRemove") { //remove inventory item
-                let index = inv.indexOf(value);
-                inv.splice(index, 1);
-            } else { // Otherwise, add value to indicated stat
-                stats[key] += value;
-            }
-        }
-    }
-
-    log.push(next.id);
-    addToDisplay(next.message, "msg-li"); //add message to board box from updated log
+    addToDisplay(nextMessage, "msg-li"); //add message to board box from updated log
     setUpChoices(next);
 }
 
