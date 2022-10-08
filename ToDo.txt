@@ -2,23 +2,17 @@ TODO:
     Save
         - auto save
     Export
-        - add character stats to export data
-        - add character info to export data
-        - add inventory to export data
-        - add settings to export data (?)
+        - update export function
     Options
         - add Font, Font Size, export Save options
-        - add "Are you sure?" screen, Y/N should return true/false
     Stats
-        - add name and pronouns to sidebar / add input to change
-        How will actions work? How will the calendar/timekeeping work?
-        - change updateStatDisplay() so that stat names are interchangable
+        - add player information to sidebar
     Inventory 
         - add inventory box
     Library
-        - change how stats are pulled, currently pull from local which isnt saved after every choice.
+        - write prompts for testing functionality
     NPC 
-        - figure out npc affinity behavior
+        - figure out npc and/or affinity behavior
     Other 
         - Expand Key Events Idea
         - Implement calendar
@@ -26,6 +20,10 @@ TODO:
 
 IDEAS:
     - Personality options that change choices or change how characters respond to you.
+    - How will actions work? How will the calendar/timekeeping work?
+        - Decrement action value until 0, then trigger "new day". This won't work with linear story progression as it's currently set up. 
+        - Have a "world timer" that counts certain prompts towards incrementing then make certain choices avalible and/or have messages check world timer for queues. 
+    - Key Events: when player makes story-significant choices, a boolean value is flipped, allowing prompts to check for them. (Add to player object?)
 
 COMPLETED TASKS
     Save 
@@ -60,3 +58,4 @@ COMPLETED TASKS
         - added getStoryObj(msgID) function to retrieve object form Libary (8/29)
         - organized & created variables for retrieving DOM elements (9/1)
         - added scroll to bottom button for scroll bar (9/1)
+        - refactored stats, charInfo, inventory and log into single playerObject (9/30)
