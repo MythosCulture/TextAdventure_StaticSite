@@ -4,103 +4,92 @@ import { playerObject } from './gameObjects.js';
 
 import { setLocal } from './gameObjects.js';
 import { getLocal } from './gameObjects.js';
+import { hasInvItem } from './gameObjects.js';
 
 let player = playerObject;
 
-////////DOM VARIABLES////////
-const board =               document.getElementById("board");
-const board_box =           document.getElementById("board-box");
-const board_list =          document.getElementById("board-log");
-const board_scroll =        document.getElementById("scrollToBottom");
-const choicebox =           document.getElementById("choice-box");
-
-const stat_calendar =       document.getElementById("calendar");
-const stat_actions =        document.getElementById("actions");
-const stat_health =         document.getElementById("health");
-const stat_sanity =         document.getElementById("sanity");
-const sidebar_save =        document.getElementById("saveBtn");
-const sidebar_options =     document.getElementById("optionsBtn");
-
-const modal_save =          document.getElementsByClassName("saveModal")[0];
-const modal_options =       document.getElementsByClassName("optionsModal")[0];
-const modal_saveClose =     document.getElementsByClassName("close")[1];
-const modal_optionsClose =  document.getElementsByClassName("close")[0];
-
-const tablinks_Arr =        document.getElementsByClassName("tablinks");
-const tabContent_Arr =      document.getElementsByClassName("tabcontent");
-
-const loadLocal =           document.getElementById("loadLocal");
-const wipeGameBtn =            document.getElementById("wipeGame");
-const fileInput =           document.getElementById('fileInput');
-const filePreview =         document.getElementById('filePreview');
-const dataTextArea =        document.getElementById('textArea');
-const exportGameBtn =          document.getElementById("data_Export");
-const loadExternal =        document.getElementById("data_Load");
-
 ////////EVENTLISTENERS////////
-board_scroll.addEventListener("click", () => scrollToBottom(board_box));
-for(let i = 0; i < choices.length; i++) {
-    let listItem = document.createElement('l');
+
+for (let i = 0; i < choices.length; i++) {
+    const choicebox = document.getElementById("choice-box");
     let button = document.createElement('button');
 
     button.id = choices[i];
     button.disabled = true;
-    button.classList.add("btn","choice-btn");
+    button.classList.add("btn", "choice-btn");
     button.innerHTML = choices[i];
-    button.addEventListener("click", (event) => {executeNextPrompt(event.target.id)});
+    button.addEventListener("click", event => executeNextPrompt(event.target.id));
 
-    listItem.appendChild(button);
-    choicebox.firstElementChild.appendChild(listItem);
+    choicebox.firstElementChild.appendChild(button);
 }
 
-sidebar_save.addEventListener("click", () => {
-    //TODO: add confirmation
+///////////OnClick/////////////
+const options = document.getElementById("options");
+options.addEventListener("click", openMenu);
+
+const closeOptions = document.getElementsByClassName("closeOptions");
+for (let i = 0; i < closeOptions.length; i++) {
+    closeOptions[i].addEventListener("click", closeMenu);
+}
+
+const save = document.getElementById("saveOnClick");
+save.addEventListener("click", () => {
     saveGame();
-    modal_save.style.display = "block";
-});
-sidebar_options.addEventListener("click", () => {
-    modal_options.style.display = "block"
-});
-
-window.addEventListener("click", (event)=>{
-    if (event.target == modal_options) {
-        modal_options.style.display = "none";
-        for (let i = 0; i < acc.length; i++) {
-            if (acc[i].nextElementSibling.style.maxHeight) {
-                acc[i].nextElementSibling.style.maxHeight = null;
-            }
-          } 
-    }
-    if (event.target == modal_save) {
-        modal_save.style.display = "none";
+    if (player = getLocal("playerSave")) {
+        console.log("Game saved");
+        const saveMessage = "Game saved!";
+        addToBoardList(saveMessage, "system-li");
+        closeMenu();
+    } else {
+        console.log("Could not save game...");
     }
 });
-modal_saveClose.addEventListener("click", () => modal_save.style.display = "none");
-modal_optionsClose.addEventListener("click", () => modal_options.style.display = "none");
-//modal_confirmClose.addEventListener("click", () => modal_confirm.style.display = "none");
 
-for (let i = 0; i < tablinks_Arr.length; i++) {
-    tablinks_Arr[i].addEventListener("click", (event) => {
-        openTab(event,"_" + event.target.id)
-    });
+const load = document.getElementById("loadOnClick");
+load.addEventListener("click", loadOnClick);
+
+function loadOnClick() {
+    triggerConfirm(() => {
+        loadGame();
+        console.log("Loading cached save from click");
+        closeMenu();
+    }, 'Are you sure you want to load? This will overwrite current progress.');
 }
 
-loadLocal.addEventListener("click", () => triggerConfirm(loadGame, 'Are you sure you want to load? This will overwrite current progress.'));
-wipeGameBtn.addEventListener("click", () => triggerConfirm(wipeGame, 'Are you sure you want to wipe your save data?'));
-exportGameBtn.addEventListener("click", () => dataTextArea.innerHTML = exportGame());
-//input.style.opacity = 0; //figure out how to style later
-fileInput.addEventListener("change", () => updateFileInput());
+const wipe = document.getElementById("wipeOnClick");
+wipe.addEventListener("click", wipeOnClick);
 
-////////UTILITY FUNCTIONS////////
-function scrollToBottom(scrollBox) {
+function wipeOnClick() {
+    triggerConfirm(() => {
+        wipeGame();
+        console.log("Save Data wiped");
+        closeMenu();
+    }, 'Are you sure you want to wipe your save data?');
+}
+
+const slide = document.getElementsByClassName("offcanvas-slide")[0];
+const overlay = document.getElementsByClassName("offcanvas-overlay")[0];
+function openMenu() {
+    overlay.style.opacity = ".25";
+    overlay.style.left = 0;
+    slide.style.left = 0;
+}
+
+function closeMenu() {
+    overlay.style.opacity = "0";
+    overlay.style.left = "-100vw";
+    slide.style.left = "-100vw";
+}
+
+const scrollBtn = document.getElementById("scrollToBottom");
+scrollBtn.addEventListener("click", scrollToBottom);
+
+const scrollBox = document.getElementById("board-box");
+function scrollToBottom() {
     scrollBox.scrollTop = scrollBox.scrollHeight;
 }
 
-function validateFile(file) {
-    if (file.type == "text/plain") return true;
-    return false;
-}
-
+////////UTILITY FUNCTIONS////////
 function triggerConfirm(func, message) {
     if (confirm(message)) {
         func()
@@ -111,10 +100,12 @@ function getLastPrompt() {
     return Library.getPrompt(player.log[player.log.length - 1].id);
 }
 
-function possibleFunction(object) {
-    if(object instanceof Function) return object(player);
+function instanceOfFunction(object) {
+    if (object instanceof Function) return object(player);
     return object;
 }
+
+/*Game functions*/
 
 function saveGame() {
     setLocal(player, "playerSave");
@@ -128,83 +119,10 @@ function loadGame() {
 
     //load object values from local storage
     player = getLocal("playerSave");
-    console.log(player); //delete later
 
-    updateStatDisplay(player);
-    //TODO: ADD INVENTORY UPDATING
-    addToDisplay( player.log[player.log.length - 1].message, "msg-li" );
-    setUpChoices( getLastPrompt());
-}
-
-function loadFromTextArea() {
-    //load from file here
-    let exampleLog = ["1", "2"]; //replace with real log & code to upload
-    //if (validateLog(exampleLog)) //check if data is valid
-    //{
-    //    saveGame(); //make sure to save to local after loading from file
-    //}
-}
-
-function exportGame() {
-    saveGame(); 
-    //TODO: Prints "[Object object]" need to update how exporting works anyways
-    return getLocal("playerSave");
-}
-
-function updateFileInput() {
-    while(filePreview.firstChild) {
-        filePreview.removeChild(filePreview.firstChild);
-      }
-
-    const files =   fileInput.files;
-    const para =    document.createElement('p');
-
-    if (files.length === 0) {
-        para.textContent = 'No file currently selected.';
-        filePreview.appendChild(para);
-    } else {
-        const file = files[0];
-
-        if(validateFile(file)){ //validate file type & populate contents into text area
-            let reader = new FileReader();
-            reader.addEventListener("load", () =>{
-                dataTextArea.innerText = reader.result;
-            });
-            reader.onerror = (e) => alert(e.target.error.name);
-            reader.readAsText(file);
-            
-            para.textContent = file.name; //TODO: returning 'file is undefined' when submitting .txt
-            filePreview.appendChild(para);
-        } else { //invalid file type
-            para.textContent = `Error, ${file.name}: Not a valid file type. Update your selection.`;
-            filePreview.appendChild(para);
-        }
-    }
-}
-function validateLog(log) { //change_log
-    let message;
-    let next;
-
-    for (let i = 0; i < log.all.length - 1; i++) {
-        message = log.getMessageAt(i);
-        next = log.getMessageAt(i+1);
-        let validChoice = false;
-
-        for (let choice in choices) {
-            if (message[choice].nextMsgId === next.id) {
-                validChoice = true;
-                break;
-            }
-        }
-
-        if (validChoice === false) {
-            console.log ("INVALID LOG");
-            console.log("Message ID: " + message.id);
-            console.log("Next message ID: " + next.id);
-            return false;
-        }
-    }
-    return true;
+    updatePlayerDisplay(player);
+    addToBoardList(player.log[player.log.length - 1].message, "msg-li");
+    setUpChoices(getLastPrompt());
 }
 
 function wipeGame() { //reset player object & local save to defaults
@@ -214,36 +132,64 @@ function wipeGame() { //reset player object & local save to defaults
     loadGame();
 }
 
-/*Game functions*/
-
 function resetDisplay() { //Remove all items with the "board-li" class
-    while(board_list.firstChild) {
-        board_list.removeChild(board_list.firstChild);
+    const boardList = document.getElementById("board-list");
+    while (boardList.firstChild) {
+        boardList.removeChild(boardList.firstChild);
     }
 }
-function updateStatDisplay(statObj) { //updates display on sidebar to match stats
-    //TODO: stat names should be interchangable
-    //stat_calendar.innerHTML =  //implement calendar stat
-    stat_actions.innerHTML = statObj.actions;
-    stat_health.innerHTML = statObj.health;
-    stat_sanity.innerHTML = statObj.sanity;
-    //TODO: add inventory here
+
+function updatePlayerDisplay(player) { //updates display on sidebar to match stats
+    const actions = document.getElementById("actions");
+    const health = document.getElementById("health");
+    const sanity = document.getElementById("sanity");
+
+    actions.innerHTML = player.actions;
+    health.innerHTML = player.health;
+    sanity.innerHTML = player.sanity;
+
+    const inventoryList = document.getElementById("inventory").firstElementChild;
+    let listItems = inventoryList.children;
+
+    //Add items from player inventory to html
+    for (let i = 0; i < player.inventory.length; i++) {
+        let invItem = player.inventory[i];
+        if (!document.getElementById(invItem.id)) {
+            const element = document.createElement("li");
+            element.id = invItem.id;
+            element.innerHTML = invItem.name + " - " + invItem.description
+
+            inventoryList.appendChild(element);
+        }
+    }
+    
+    //Remove items from html list if player doesn't have them
+    for (let i = 0; i < listItems.length; i++) {
+        const listItem = listItems[i];
+        console.log(hasInvItem(player, listItem.id));
+
+        if (!hasInvItem(player, listItem.id)) {
+            inventoryList.removeChild(listItems[i]);
+            i -= 1;
+        }
+    }
 }
-function addToDisplay(content, classToAssign) {
+
+function addToBoardList(content, classToAssign) {
+    const boardList = document.getElementById("board-list");
     const element = document.createElement("li");
     element.className = classToAssign + " board-li"
     element.innerHTML = content;
-    board_list.appendChild(element);
+    boardList.appendChild(element);
 
-    //Scroll to bottom
-    scrollToBottom(board_box);
+    scrollToBottom();
 }
-function setUpChoices(libraryPrompt) { //TODO: UPDATE
+function setUpChoices(libraryPrompt) {
     //cycle through choiceList, hide/disable choices that are undefined
     choices.forEach(choice => {
         const element = document.getElementById(choice);
-        let promptChoice = possibleFunction(libraryPrompt[choice]);
-        
+        let promptChoice = instanceOfFunction(libraryPrompt[choice]);
+
         if (promptChoice === undefined) { //no choice defined
             element.disabled = true;
             element.classList.add("hidden");
@@ -256,13 +202,20 @@ function setUpChoices(libraryPrompt) { //TODO: UPDATE
 }
 
 function executeNextPrompt(choiceString) {
-    const lastChoice = possibleFunction(getLastPrompt()[choiceString]);
+    const lastChoice = instanceOfFunction(getLastPrompt()[choiceString]);
     const next = Library.getPrompt(lastChoice.nextId); //next prompt
-    const nextMessage = possibleFunction(next.message);
+    
+    if (next === undefined) { //cancel execute if no message exists
+        return console.log(`Attempted to execute last prompt ID: ${getLastPrompt().id}, ${choiceString}. Next prompt ID: ${lastChoice.nextId} missing from library.`);
+    }
 
-    if (next.modifyStats) player = next.modifyStats(player);
+    const nextMessage = instanceOfFunction(next.message);
 
-    console.log(next);
+    if (next.modifyStats) {
+        player = next.modifyStats(player);
+        updatePlayerDisplay(player);
+    }
+
     //add choice obj to last log obj in player
     player.log[player.log.length - 1][choiceString] = lastChoice;
     player.log.push({
@@ -271,38 +224,9 @@ function executeNextPrompt(choiceString) {
     });
 
     const choiceTxt = document.getElementById(choiceString).innerHTML;
-    addToDisplay("> "+ choiceTxt, "ch-li");
-    addToDisplay(nextMessage, "msg-li"); //add message to board box from updated log
+    addToBoardList(choiceTxt, "ch-li");
+    addToBoardList(nextMessage, "msg-li"); //add message to board box from updated log
     setUpChoices(next);
 }
-
-function openTab(event, tabId) {
-    var i;
-    for (i = 0; i < tabContent_Arr.length; i++) {
-      tabContent_Arr[i].style.display = "none";
-    }
-    for (i = 0; i < tablinks_Arr.length; i++) {
-      tablinks_Arr[i].className = tablinks_Arr[i].className.replace(" active", "");
-    }
-    document.getElementById(tabId).style.display = "block";
-    event.currentTarget.className += " active";
-}
-
-//code for accordians
-var acc = document.getElementsByClassName("accordion");
-//useful for assigning multiple accordions this eventlistener
-for (let i = 0; i < acc.length; i++) {
-  acc[i].addEventListener("click", function() {
-
-    this.classList.toggle("active");
-
-    var panel = this.nextElementSibling;
-    if (panel.style.maxHeight) {
-        panel.style.maxHeight = null;
-    } else {
-        panel.style.maxHeight = panel.scrollHeight + "px";
-    }
-  });
-} 
 
 loadGame();
