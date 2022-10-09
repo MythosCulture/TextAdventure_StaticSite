@@ -12,112 +12,55 @@
 </head>
 
 <body>
-    <nav class="sidebar flex-column">
-        <ul>
-            <li>Calendar: <span id="calendar"></span></li>
-            <li>Actions Left: <span id="actions"></span></li>
-            <li>Health: <span id="health"></span></li>
-            <li>Sanity: <span id="sanity"></span></li>
-            <li>Inventory/Other</li>
-        </ul>
-        <div class="grid-container">
-            <div class="grid-item">1</div>
-            <div class="grid-item">2</div>
-            <div class="grid-item">3</div>
-            <div class="grid-item">4</div>
-        <div>
-        <ul>
-            <li style="padding-top: 0px;"><button class="btn menu-btn" id="saveBtn">Save</button></li>
-            <li style="padding-top: 0px;"><button class="btn menu-btn" id="optionsBtn">Options</button></li>
-        </ul>
-    </nav>
-
-    <div id="board">
-        <div class="flex-column">
-            <h1 style="margin: 0;">Board Header</h1>
-
+    <div class="offcanvas-overlay closeOptions"></div>
+    <div id="sidebar">
+        <div class="offcanvas-bar flex flex-column offcanvas-slide">
+            <button class="btn offcanvas-close closeOptions" type="button">x</button>
+            <ul class="option-list">
+                <li class="btn" type="button" id="saveOnClick">Save Game</li>
+                <li class="btn" type="button" id="loadOnClick">Load Save</li>
+                <li class="btn" type="button" id="wipeOnClick">Start Over</li>
+            </ul>
+        </div>
+    </div>
+    <main id="grid">
+        <nav>
+            <button id="options" type="button" class="btn nav-btn">Options</button>
+        </nav>
+        
+        <div class="container grid-board">
+            <div class="top-bar">
+            <h1 class="header1"> This is header 1.</h1>
+            </div>
             <div id="board-box">
-                board box
-                <ul id="board-log">
-                    <!--Messages go here-->
+                <ul id="board-list">
+
                 </ul>
             </div>
-            <div style="text-align: right;">            
-                <button id="scrollToBottom">Scroll to Bottom</button>
-            </div>
-            
-
-            <div id="choice-box">
-                <ul></ul>
+            <div style="text-align: right;">
+                <button id="scrollToBottom" class="btn" type="button">Scroll to
+                    Bottom</button>
             </div>
         </div>
-    </div>
-
-    <div class="modal optionsModal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div class="tab">
-                <button class="tablinks active" id="Tab1">Game Data</button>
-                <button class="tablinks" id="Tab2">Settings</button>
-                <button class="tablinks" id="Tab3")">TestTab</button>
-            </div>
-
-            <div id="_Tab1" class="tabcontent" style="display: block;">
-                <h3>Game Data</h3>
-                <div class="flex-column">
-                    <div class="flex-row">
-                        <button class="btn" id="loadLocal">Load Local Save</button>
-                        <h3>Load Game</h3>
-                    </div>
-                    <div class="flex-row">
-                        <button class="btn" id="wipeGame">Delete Local Save</button>
-                        <h3>Delete Game</h3>
-                    </div>
-                    <div class="flex-row">
-                        <div>
-                            <label>Load data from file (.txt)</label>
-                            <input type="file" accept=".txt" id="fileInput">
-                        </div>
-                        <div id="filePreview">
-                            <p>No file currently selected.</p>
-                        </div>
-                    </div>
-                    <div>
-                        <textarea id="textArea"></textarea>
-                    </div>
-                    <div class="flex-row">
-                        <button class="btn" id="data_Export">Generate Export Code</button>
-                        <button class="btn" id="data_Load">Load Game from Export Code</button>
-                        <button class="btn" id="clearDataTxt">Clear</button>
-                    </div>
-                </div>
-                <!-- Accordian
-                    <button class="accordion">Section 1</button>
-                    <div class="acc-panel">
-                        <p>Lorem ipsum...</p>
-                    </div>
-                -->
-            </div>
-            <div id="_Tab2" class="tabcontent">
-                <h3>Settings</h3>
-                <p>Font</p>
-                <p>Font Size</p>
-                <p>Theme</p>
-            </div>
-            <div id="_Tab3" class="tabcontent">
-                <h3>TestTab</h3>
-                <p>Test tab content here.</p>
-            </div>
-
+        <div id="choice-box" class="grid-choice">
+            <ul class="list-none flex flex-column"></ul>
         </div>
-    </div>
 
-    <div class="modal saveModal">
-        <div class="modal-content save-content">
-            <span class="close">&times;</span>
-            <h1>Progress Saved!</h1>
+        <div id="stats">
+            <ul class="list-none stat-list">
+                <li>Actions Left: <span id="actions"></span></li>
+                <li>Health: <span id="health"></span></li>
+                <li>Sanity: <span id="sanity"></span></li>
+                <!--Player stats go here-->
+            </ul>
         </div>
-    </div>
+        <div id="inventory">
+            Inventory:
+            <ul class="list-none inv-list">
+                <!--Inventory goes here-->
+            </ul>
+        </div>
+    </main>
 
     <script language="javascript" type="module" src="gameObjects.js"></script>
     <script language="javascript" type="module" src="main.js"></script>
