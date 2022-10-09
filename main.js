@@ -8,8 +8,7 @@ import { hasInvItem } from './gameObjects.js';
 
 let player = playerObject;
 
-////////EVENTLISTENERS////////
-
+///////////OnClick/////////////
 for (let i = 0; i < choices.length; i++) {
     const choicebox = document.getElementById("choice-box");
     let button = document.createElement('button');
@@ -23,7 +22,6 @@ for (let i = 0; i < choices.length; i++) {
     choicebox.firstElementChild.appendChild(button);
 }
 
-///////////OnClick/////////////
 const options = document.getElementById("options");
 options.addEventListener("click", openMenu);
 
